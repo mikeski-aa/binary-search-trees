@@ -81,12 +81,10 @@ const tree = (input) => {
 
   const insert = (val) => {
     return insertInTree(val, root);
-    
   };
 
   // recursive function to go through the tree and insert a value at appropriate location
   const insertInTree = (val, targetNode) => {
-
     if (targetNode == null) {
       let newNode = node(val);
       targetNode = newNode;
@@ -104,26 +102,44 @@ const tree = (input) => {
   // delete a value
   const deleteItem = (val) => {
     return deleteInTree(val, root);
-  }
+  };
 
-  // go through tree and delete item found
-  // need to think one step ahead since .left and .right need to get moved if there are children
+  // deleting a leaf is simple - leaf = no children
+  // deleting w/ one child (either left or right) is simple, move where the pointer points to
+  // deleting node with two children is more complex
+  // you need to go into right subtree, and then go into the first left value to see if it is the next largest
+  // if there are multiple lefts in the first right after target node, go through to the end to find target
+
   const deleteInTree = (val, targetNode) => {
+    // base case in case we get to the end
+    if (targetNode === null) {
+      return targetNode;
+    }
+// if value is less than target, we go left
+// if value is more than target, we go right
+    if (val < targetNode.value) {
+       return deleteInTree(val, targetNode.left)
+    } else if (val > targetNode.value) {
+        return deleteInTree(val,targetNode.right)
+    };
+// if we go neither left or right, means we found the node
 
-    if (targetNode.left.value == val) {
-        let oldLeft = {...targetNode.left.left}
-        let oldRight = {...targetNode.left.right};
+    if (targetNode.left === null && targetNode.right === null) {
+        console.log('Target acquired, no children')
+      
+    }
+    console.log(targetNode.value);
 
-      }
-  }
+  };
 
   return {
     root,
     insert,
+    deleteItem,
   };
 };
 
-let x = [5, 17, 25];
+let x = [ 6, 19, 23, 47, 54, 56, 58, 77, 79, 91];
 
 console.log(sortArray(x));
 
@@ -131,9 +147,10 @@ let testTree = tree(x);
 // console.log(buildTree(x));
 
 console.log(testTree.root.right);
-console.log(testTree.insert(14));
-console.log(testTree.insert(2));
+// console.log(testTree.insert(14));
 // console.log(testTree.insert(18));
 // console.log(testTree.insert(123));
 // console.log(testTree.insert(2323));
+testTree.deleteItem(6);
 prettyPrint(testTree.root);
+
