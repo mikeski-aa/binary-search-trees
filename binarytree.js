@@ -9,7 +9,7 @@ function prettyPrint(node, prefix = "", isLeft = true) {
   if (node === null) {
     return;
   }
-  if (node.right !== null) {
+  if (node.right != null) {
     prettyPrint(node.right, `${prefix}${isLeft ? "│   " : "    "}`, false);
   }
   console.log(`${prefix}${isLeft ? "└── " : "┌── "}${node.value}`);
@@ -110,47 +110,121 @@ const tree = (input) => {
   // you need to go into right subtree, and then go into the first left value to see if it is the next largest
   // if there are multiple lefts in the first right after target node, go through to the end to find target
 
-  const deleteInTree = (val, targetNode) => {
+  const deleteInTree = (val, targetNode, previousNode) => {
     // base case in case we get to the end
     if (targetNode === null) {
       return targetNode;
     }
-// if value is less than target, we go left
-// if value is more than target, we go right
+    // if value is less than target, we go left
+    // if value is more than target, we go right
     if (val < targetNode.value) {
-       return deleteInTree(val, targetNode.left)
+      return deleteInTree(val, targetNode.left, targetNode);
     } else if (val > targetNode.value) {
-        return deleteInTree(val,targetNode.right)
-    };
-// if we go neither left or right, means we found the node
+      return deleteInTree(val, targetNode.right, targetNode);
+    }
+    // if we go neither left or right, means we found the node
+    // need to identify how many children there are
+    // if no children are present, it is quite simple
 
     if (targetNode.left === null && targetNode.right === null) {
-        console.log('Target acquired, no children')
-      
+      console.log("Target acquired, no children");
+      console.log(previousNode);
+      if (previousNode.left != null && previousNode.left.value === val) {
+        previousNode.left = null;
+      } else {
+        previousNode.right = null;
+      }
+      return targetNode;
     }
-    console.log(targetNode.value);
+    // if we have one child present either on left or right we can do this
+    // there must be a more elegant way of writing this instead of nested
+    // if loops, this code is horrible!
 
+    if (targetNode.left != null && targetNode.right === null) {
+      console.log("Target found, only one child present");
+      if (targetNode.value < previousNode.value) {
+        let oldNode = { ...targetNode.left };
+        previousNode.left = oldNode;
+      } else {
+        let oldNode = { ...targetNode.left };
+        previousNode.right = oldNode;
+      }
+    } else if (targetNode.left === null && targetNode.right != null) {
+      console.log("Target found, only one child present");
+      if (targetNode.value < previousNode.value) {
+        let oldNode = { ...targetNode.right };
+        previousNode.left = oldNode;
+      } else {
+        let oldNode = { ...targetNode.right };
+        previousNode.right = oldNode;
+      }
+    }
+    // removing a node with 2 children
+    // we need to find next biggest in the right subtree
+    // and go first left
+    if (targetNode.left != null && targetNode.right != null) {
+      console.log("Target acquired, target has 2 children");
+      let start = targetNode.right;
+      while (start != null) {
+        if (start.left === null) {
+          // console.log('found replacement')
+          // console.log(start.value);
+          // console.log(targetNode.right.value);
+          let tempNode = { ...start.right };
+          if (tempNode.value === undefined) {
+            targetNode.right = null;
+            targetNode.value = start.value;
+          } else {
+            targetNode.right.left = tempNode;
+            targetNode.value = start.value;
+          }
+        }
+        start = start.left;
+      }
+      return targetNode;
+    }
+  };
+
+  const find = (val, targetNode) => {
+    if (targetNode === null) {
+      throw new Error("Target not in tree!");
+    }
+
+    if (val < targetNode.value) {
+      console.log("we go left");
+      return find(val, targetNode.left);
+    } else if (val > targetNode.value) {
+      console.log("we go right");
+      return find(val, targetNode.right);
+    }
+    console.log("target found");
+    console.log(targetNode);
+    return targetNode;
   };
 
   return {
     root,
+    find,
     insert,
     deleteItem,
   };
 };
 
-let x = [ 6, 19, 23, 47, 54, 56, 58, 77, 79, 91];
+let x = [1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 243, 3, 99, 23, 1231];
 
-console.log(sortArray(x));
-
-let testTree = tree(x);
+let testTree = tree(sortArray(x));
 // console.log(buildTree(x));
 
-console.log(testTree.root.right);
 // console.log(testTree.insert(14));
 // console.log(testTree.insert(18));
 // console.log(testTree.insert(123));
 // console.log(testTree.insert(2323));
-testTree.deleteItem(6);
-prettyPrint(testTree.root);
+// testTree.deleteItem(4);
+// testTree.deleteItem(7);
+// testTree.deleteItem(9);
 
+// console.log(testTree.root);
+// console.log(testTree.root.right);
+
+prettyPrint(testTree.root);
+testTree.find(69, testTree.root);
