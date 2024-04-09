@@ -337,8 +337,86 @@ const tree = (input) => {
     return holdArr[0];
   };
 
+  // find the depth -> depth is number of edges from root
+
+  const depth = (val, targetNode, count) => {
+    let currCount = 0;
+
+    if (count) {
+      currCount = count;
+    }
+
+    if (targetNode === null) {
+      throw new Error("Target not in tree!");
+    }
+
+    if (val < targetNode.value) {
+      console.log("we go left");
+      currCount += 1;
+      return depth(val, targetNode.left, currCount);
+    } else if (val > targetNode.value) {
+      console.log("we go right");
+      currCount += 1;
+      return depth(val, targetNode.right, currCount);
+    }
+    // console.log("target found");
+    // console.log(targetNode);
+    console.log(currCount);
+    return currCount;
+  };
+
+  // isBalanced function checks if the tree is balanced
+  // a tree is balanced where the difference between heights of the left and right subtrees
+  // is not more than 1
+
+  const isBalanced = () => {
+    let rHeight = 0;
+    let lHeight = 0;
+    let sortArr = [];
+    if (root.right != null) {
+      let right = root.right;
+      rHeight = height(right) + 1;
+    } else {
+      rHeight = 0;
+    }
+
+    if (root.left != null) {
+      let left = root.left;
+      lHeight = height(left) + 1;
+    } else {
+      lHeight = 0;
+    }
+
+    sortArr.push(rHeight);
+    sortArr.push(lHeight);
+    sortArr.sort((a, b) => {
+      return b - a;
+    });
+
+    if (sortArr[0] - sortArr[1] > 1) {
+      console.log("Tree is not balanced");
+      return false;
+    } else {
+      console.log("Tree is balanced!");
+      return true;
+    }
+  };
+
+  // rebalance the tree
+  // need to go through all values, create a new array, and re-build the tree!
+
+  const rebalance = () => {
+    let tempArr = levelOrder();
+    let sortedArray = sortArray(tempArr);
+    testTree = tree(sortedArray);
+    prettyPrint(testTree.root);
+  };
+
   return {
     root,
+    rebalance,
+    isBalanced,
+    depth,
     height,
     postorder,
     inorder,
@@ -350,31 +428,63 @@ const tree = (input) => {
   };
 };
 
-let x = [1, 7, 4, 23, 8, 9, 4, 3, 5, 7, 9, 67, 6345, 324];
+// function to generate a random array of length < 100
+function generateArray() {
+  let newArray = [];
+  for (let i = 0; i < 100; i++) {
+    newArray.push(Math.floor(Math.random() * 100));
+  }
+  console.log(newArray);
+  return newArray;
+}
 
-let testTree = tree(sortArray(x));
-// console.log(buildTree(x));
+// function to generate random numbers to be inserted into tree:
+function newRandNumbers() {
+  let newNum = Math.floor(Math.random() * 250);
+  return newNum;
+}
 
-console.log(testTree.insert(14));
-console.log(testTree.insert(18));
-console.log(testTree.insert(123));
-console.log(testTree.insert(2323));
-// testTree.deleteItem(4);
-// testTree.deleteItem(7);
-// testTree.deleteItem(9);
+// function to generate random amount of new numbers
+// at least 5 will be added, up to 20
+function newNumbersAdded() {
+  let numberCap = Math.floor(Math.random() * (20 - 5) + 5);
 
-// console.log(testTree.root);
-// console.log(testTree.root.right);
+  for (let i = 0; i < numberCap; i++) {
+    newTree.insert(newRandNumbers());
+  }
 
-prettyPrint(testTree.root);
-testTree.levelOrder();
+  return newTree;
+}
 
-testTree.height(testTree.find(8, testTree.root));
-console.log(testTree.height(testTree.find(8, testTree.root)));
+// Testing this HELLISH MESS
 
-// console.log(testTree.preorder(testTree.root));
-// console.log(testTree.inorder(testTree.root));
-// console.log(testTree.postorder(testTree.root));
-// testTree.preorder(testTree.root);
+let newArr = generateArray();
+let newTree = tree(sortArray(newArr));
+prettyPrint(newTree.root);
+newTree.isBalanced();
+console.log("Level Order Array: ");
+newTree.levelOrder();
+console.log(`Pre Order array: `);
+console.log(newTree.preorder(newTree.root));
+console.log(`In Order array: `);
+console.log(newTree.inorder(newTree.root));
+console.log(`Post Order array: `);
+console.log(newTree.postorder(newTree.root));
 
-// testTree.find(69, testTree.root);
+// insert minimum 5 new numbers, print new tree
+newNumbersAdded();
+console.log("New tree post insertion");
+prettyPrint(newTree.root);
+newTree.isBalanced();
+newTree.rebalance();
+newTree.isBalanced();
+
+// printing elements out again
+console.log("Level Order Array: ");
+newTree.levelOrder();
+console.log(`Pre Order array: `);
+console.log(newTree.preorder(newTree.root));
+console.log(`In Order array: `);
+console.log(newTree.inorder(newTree.root));
+console.log(`Post Order array: `);
+console.log(newTree.postorder(newTree.root));
